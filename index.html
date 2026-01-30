@@ -95,6 +95,34 @@
         </div>
     </div>
 
+    <!-- Install Prompt for PWA -->
+    <div id="install-toast" class="install-toast hidden">
+        <div class="toast-content">
+            <span class="icon"><img src="icons/icon-192.png" alt="App Icon"></span>
+            <div class="text">
+                <strong>Install App</strong>
+                <p>Add to Home Screen for offline access</p>
+            </div>
+        </div>
+        <div class="toast-actions">
+            <button id="install-btn" class="btn btn-primary btn-sm">Install</button>
+            <button id="dismiss-install" class="icon-btn-sm"><i class="ri-close-line"></i></button>
+        </div>
+    </div>
+
+    <!-- Modal for Activity Calendar (Mobile Drill-down) -->
+    <div id="activity-calendar-modal" class="modal hidden">
+        <div class="modal-content glass-panel calendar-modal-content">
+            <span id="close-calendar-modal" class="close-modal">&times;</span>
+            <h3 id="calendar-modal-title">Activity Name</h3>
+            <p class="modal-subtitle">Select the date to save progress</p>
+
+            <div id="calendar-grid" class="calendar-grid">
+                <!-- Days will be injected here -->
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
     <script>
         if ('serviceWorker' in navigator) {

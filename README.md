@@ -31,3 +31,14 @@ This application allows users to track their daily activities (like reading, exe
     *   Node: `npx serve`
 3.  **Open** the local URL (usually `http://localhost:8000`).
 4.  **Install**: Click the install icon in your browser's address bar to add it to your device.
+
+## Custom Local URL (Optional)
+
+To access the app via `http://habit-tracker:8000` instead of `localhost`:
+
+1.  **Edit Hosts File**:
+    *   Open Notepad as Administrator.
+    *   Open `C:\Windows\System32\drivers\etc\hosts`.
+    *   Add this line at the bottom: `127.0.0.1 habit-tracker`
+    *   Save and close.
+2.  **Access**: content is now served at `http://habit-tracker:8000`.

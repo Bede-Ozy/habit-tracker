@@ -32,8 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Export Element
     const exportBtn = document.getElementById('export-btn');
 
+    // Install Prompt Elements
+    const installToast = document.getElementById('install-toast');
+    const installBtn = document.getElementById('install-btn');
+    const dismissInstallBtn = document.getElementById('dismiss-install');
+    let deferredPrompt;
+
     // Current selection for modal
     let selectedCell = { activity: null, dateStr: null };
+    let currentMobileActivity = null;
+
+    // Calendar Modal Elements
+    const calendarModal = document.getElementById('activity-calendar-modal');
+    const closeCalendarModalBtn = document.getElementById('close-calendar-modal');
+    const calendarModalTitle = document.getElementById('calendar-modal-title');
+    const calendarGrid = document.getElementById('calendar-grid');
 
     // --- Initialization ---
     renderTracker();
@@ -43,8 +56,18 @@ document.addEventListener('DOMContentLoaded', () => {
     nextMonthBtn.addEventListener('click', () => changeMonth(1));
 
     closeModalBtn.addEventListener('click', hideModal);
+
+    closeCalendarModalBtn.addEventListener('click', () => {
+        calendarModal.classList.remove('active');
+        setTimeout(() => calendarModal.classList.add('hidden'), 300);
+    });
+
     window.addEventListener('click', (e) => {
         if (e.target === modal) hideModal();
+        if (e.target === calendarModal) {
+            calendarModal.classList.remove('active');
+            setTimeout(() => calendarModal.classList.add('hidden'), 300);
+        }
     });
 
     saveLogBtn.addEventListener('click', saveModalData);
@@ -55,6 +78,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     exportBtn.addEventListener('click', exportToCSV);
+
+    // --- PWA Install Logic ---
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent Chrome 67 and earlier from automatically showing the prompt
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        deferredPrompt = e;
+        // Update UI to notify the user they can add to home screen
+        showInstallPromotion();
+    });
+
+    installBtn.addEventListener('click', async () => {
+        hideInstallPromotion();
+        // Show the install prompt
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            // We've used the prompt, and can't use it again, discard it
+            deferredPrompt = null;
+        }
+    });
+
+    dismissInstallBtn.addEventListener('click', () => {
+        hideInstallPromotion();
+    });
+
+    window.addEventListener('appinstalled', () => {
+        // Hide the app-provided install promotion
+        hideInstallPromotion();
+        // Clear the deferredPrompt so it can be garbage collected
+        deferredPrompt = null;
+        console.log('PWA was installed');
+    });
+
+    function showInstallPromotion() {
+        if (installToast) installToast.classList.remove('hidden');
+    }
+
+    function hideInstallPromotion() {
+        if (installToast) installToast.classList.add('hidden');
+    }
 
     // --- Functions ---
 
@@ -139,6 +205,14 @@ document.addEventListener('DOMContentLoaded', () => {
             stickyWrapper.className = 'activity-label';
             stickyWrapper.appendChild(labelContainer);
 
+            // Add click listener for mobile drill-down
+            stickyWrapper.addEventListener('click', (e) => {
+                // Only trigger on mobile (check window width or just always allow opening calendar view? 
+                // Let's allow it always as a nice detail view, but it's essential for mobile.
+                // We must avoid triggering if delete button was clicked (handled by stopPropagation there)
+                openActivityCalendar(activity);
+            });
+
             row.appendChild(stickyWrapper);
 
             // Grid Cells
@@ -170,6 +244,11 @@ document.addEventListener('DOMContentLoaded', () => {
             row.appendChild(cellsContainer);
             gridContainer.appendChild(row);
         });
+
+        // Refresh mobile calendar if open
+        if (typeof calendarModal !== 'undefined' && calendarModal.classList.contains('active') && currentMobileActivity) {
+            openActivityCalendar(currentMobileActivity);
+        }
     }
 
     function addNewActivity() {
@@ -197,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Modal Logic ---
 
-    function openModal(activity, dateKey) {
+    function openModal(activity, dateKey, useGrowAnimation = false) {
         selectedCell = { activity, dateKey };
 
         modalActivityTitle.textContent = activity;
@@ -208,6 +287,13 @@ document.addEventListener('DOMContentLoaded', () => {
         modalCompleted.checked = data.completed || false;
         modalHours.value = data.hours || '';
         modalNotes.value = data.notes || '';
+
+        const modalContent = modal.querySelector('.modal-content');
+        if (useGrowAnimation) {
+            modalContent.classList.add('grow-out');
+        } else {
+            modalContent.classList.remove('grow-out');
+        }
 
         modal.classList.remove('hidden');
         // Small timeout to allow CSS transition to capture opacity change
@@ -223,31 +309,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300); // Match transition duration
     }
 
-    function saveModalData() {
-        const { activity, dateKey } = selectedCell;
-        if (!activity || !dateKey) return;
+    function openActivityCalendar(activity) {
+        currentMobileActivity = activity;
+        calendarModalTitle.textContent = activity;
 
-        const completed = modalCompleted.checked;
-        const hours = parseFloat(modalHours.value) || 0;
-        const notes = modalNotes.value.trim();
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const daysInMonth = getDaysInMonth(currentDate);
 
-        // If empty, user might be clearing it. 
-        // We'll save if there's any data, otherwise delete the key to keep clean? 
-        // For simplicity, just save.
+        calendarGrid.innerHTML = '';
 
-        if (!completed && hours === 0 && !notes) {
-            delete trackerData[activity][dateKey];
-        } else {
-            trackerData[activity][dateKey] = {
-                completed,
-                hours,
-                notes
-            };
+        // Simple grid of just dates 1..N
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dateKey = formatDateKey(year, month, i);
+            const cellData = trackerData[activity][dateKey];
+
+            const dayCell = document.createElement('div');
+            dayCell.className = 'calendar-day';
+            dayCell.textContent = i;
+
+            if (cellData) {
+                dayCell.classList.add('has-data');
+                if (cellData.completed) {
+                    dayCell.classList.add('completed');
+                    dayCell.innerHTML = `<span>${i}</span><i class="ri-check-line" style="position:absolute; bottom:2px; right:2px; font-size:10px;"></i>`;
+                } else if (cellData.hours > 0) {
+                    dayCell.classList.add('some-hours');
+                }
+            }
+
+            dayCell.addEventListener('click', () => {
+                // Close the calendar modal first
+                calendarModal.classList.remove('active');
+                setTimeout(() => {
+                    calendarModal.classList.add('hidden');
+                    // Open logging modal with animation AFTER calendar starts closing
+                    openModal(activity, dateKey, true);
+                }, 100); // Slight delay for smoother transition
+            });
+
+            calendarGrid.appendChild(dayCell);
         }
 
-        saveData();
-        renderTracker();
-        hideModal();
+        calendarModal.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            calendarModal.classList.add('active');
+        });
     }
 
     // --- CSV Export ---
