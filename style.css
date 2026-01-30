@@ -670,7 +670,83 @@ body {
     font-weight: bold;
 }
 
-/* Install Toast */
+/* User Guide Modal */
+.guide-modal-content {
+    max-width: 400px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.guide-header {
+    margin-bottom: 2rem;
+}
+
+.guide-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.guide-steps {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.step-icon {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--accent-primary);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.step-text strong {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: white;
+}
+
+.step-text p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Time Inputs */
+.time-inputs {
+    display: flex;
+    gap: 1rem;
+}
+
+.time-inputs select {
+    flex: 1;
+}
+
+.btn-block {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+
 .install-toast {
     position: fixed;
     bottom: 2rem;
@@ -749,6 +825,8 @@ body {
     background: rgba(255, 255, 255, 0.1);
     color: white;
 }
+
+/* DEPRECATED INSTALL TOAST STYLES REMOVED */
 
 /* Update activity label to be a flex container */
 .activity-label {

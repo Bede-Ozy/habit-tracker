@@ -1,11 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- State Management ---
     const STATE_KEY = 'challenge_tracker_data';
-    // const DEFAULT_ACTIVITIES = []; // Removed defaults
 
     let currentDate = new Date();
     // We'll track data by 'YYYY-MM-DD' keys inside an activity object
-    // Structure: { activityName: { '2026-01-01': { completed: true, hours: 2, notes: '' } } }
     let trackerData = loadData();
 
     // --- DOM Elements ---
@@ -21,7 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalActivityTitle = document.getElementById('modal-activity-title');
     const modalDateDisplay = document.getElementById('modal-date-display');
     const modalCompleted = document.getElementById('modal-completed');
-    const modalHours = document.getElementById('modal-hours');
+
+    // Duration Elements
+    const modalDurationValue = document.getElementById('modal-duration-value');
+    const modalDurationUnit = document.getElementById('modal-duration-unit');
+
     const modalNotes = document.getElementById('modal-notes');
     const saveLogBtn = document.getElementById('save-log-btn');
 
@@ -32,10 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Export Element
     const exportBtn = document.getElementById('export-btn');
 
-    // Install Prompt Elements
-    const installToast = document.getElementById('install-toast');
-    const installBtn = document.getElementById('install-btn');
-    const dismissInstallBtn = document.getElementById('dismiss-install');
+    // User Guide / Install Elements
+    const userGuideModal = document.getElementById('user-guide-modal');
+    const closeGuideModalBtn = document.getElementById('close-guide-modal');
+    const guideActionBtn = document.getElementById('guide-action-btn');
     let deferredPrompt;
 
     // Current selection for modal
@@ -62,11 +64,24 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => calendarModal.classList.add('hidden'), 300);
     });
 
+    if (closeGuideModalBtn) {
+        closeGuideModalBtn.addEventListener('click', () => {
+            closeGuide();
+        });
+    }
+
+    if (guideActionBtn) {
+        guideActionBtn.addEventListener('click', handleGuideAction);
+    }
+
     window.addEventListener('click', (e) => {
         if (e.target === modal) hideModal();
         if (e.target === calendarModal) {
             calendarModal.classList.remove('active');
             setTimeout(() => calendarModal.classList.add('hidden'), 300);
+        }
+        if (e.target === userGuideModal) {
+            closeGuide();
         }
     });
 
@@ -79,48 +94,90 @@ document.addEventListener('DOMContentLoaded', () => {
 
     exportBtn.addEventListener('click', exportToCSV);
 
-    // --- PWA Install Logic ---
+    // --- PWA Install / Guide Logic ---
     window.addEventListener('beforeinstallprompt', (e) => {
-        // Prevent Chrome 67 and earlier from automatically showing the prompt
         e.preventDefault();
-        // Stash the event so it can be triggered later.
         deferredPrompt = e;
-        // Update UI to notify the user they can add to home screen
-        showInstallPromotion();
-    });
-
-    installBtn.addEventListener('click', async () => {
-        hideInstallPromotion();
-        // Show the install prompt
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            // Wait for the user to respond to the prompt
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`User response to the install prompt: ${outcome}`);
-            // We've used the prompt, and can't use it again, discard it
-            deferredPrompt = null;
-        }
-    });
-
-    dismissInstallBtn.addEventListener('click', () => {
-        hideInstallPromotion();
+        updateGuideCTA();
     });
 
     window.addEventListener('appinstalled', () => {
-        // Hide the app-provided install promotion
-        hideInstallPromotion();
-        // Clear the deferredPrompt so it can be garbage collected
         deferredPrompt = null;
         console.log('PWA was installed');
+        closeGuide();
     });
 
-    function showInstallPromotion() {
-        if (installToast) installToast.classList.remove('hidden');
+    // Check if app is installed to update CTA
+    async function checkInstalledRelatedApps() {
+        if ('getInstalledRelatedApps' in navigator) {
+            try {
+                const relatedApps = await navigator.getInstalledRelatedApps();
+                if (relatedApps.length > 0) {
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error checking installed apps:', error);
+            }
+        }
+        return false;
     }
 
-    function hideInstallPromotion() {
-        if (installToast) installToast.classList.add('hidden');
+    async function updateGuideCTA() {
+        // Default state
+        let actionText = "Start Using App";
+        let actionConfig = "close";
+
+        // Check installation status
+        const isInstalled = await checkInstalledRelatedApps();
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+
+        if (isStandalone) {
+            // Already open in app, button should just close guide
+            actionText = "Continue";
+            actionConfig = "close";
+        } else if (isInstalled) {
+            actionText = "Open App";
+            actionConfig = "open";
+        } else if (deferredPrompt) {
+            actionText = "Install App";
+            actionConfig = "install";
+        }
+
+        guideActionBtn.textContent = actionText;
+        guideActionBtn.dataset.action = actionConfig;
     }
+
+    async function handleGuideAction() {
+        const action = guideActionBtn.dataset.action;
+
+        if (action === 'install' && deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            deferredPrompt = null;
+            closeGuide();
+        } else if (action === 'open') {
+            alert("Please open the 'Challenge Tracker' app from your home screen.");
+            closeGuide();
+        } else {
+            closeGuide();
+        }
+    }
+
+    function closeGuide() {
+        userGuideModal.classList.remove('active');
+        setTimeout(() => userGuideModal.classList.add('hidden'), 300);
+        localStorage.setItem('guideSeen', 'true');
+    }
+
+    // Show guide on load if not seen (or always for this request context?)
+    setTimeout(() => {
+        // if (!localStorage.getItem('guideSeen')) { 
+        userGuideModal.classList.remove('hidden');
+        requestAnimationFrame(() => userGuideModal.classList.add('active'));
+        updateGuideCTA();
+        // }
+    }, 500);
 
     // --- Functions ---
 
@@ -207,9 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Add click listener for mobile drill-down
             stickyWrapper.addEventListener('click', (e) => {
-                // Only trigger on mobile (check window width or just always allow opening calendar view? 
-                // Let's allow it always as a nice detail view, but it's essential for mobile.
-                // We must avoid triggering if delete button was clicked (handled by stopPropagation there)
                 openActivityCalendar(activity);
             });
 
@@ -282,10 +336,27 @@ document.addEventListener('DOMContentLoaded', () => {
         modalActivityTitle.textContent = activity;
         modalDateDisplay.textContent = new Date(dateKey).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-        // Load existing data if any
         const data = trackerData[activity][dateKey] || {};
         modalCompleted.checked = data.completed || false;
-        modalHours.value = data.hours || '';
+
+        // Handle duration display
+        let totalHours = data.hours || 0;
+
+        // Logic: 
+        // If totalHours is 0, default to Hours 0
+        // If totalHours < 1 (e.g. 0.5), show Minutes (30)
+        // If totalHours >= 1, show Hours (e.g. 1.5)
+        // This is a heuristic.
+
+        if (totalHours > 0 && totalHours < 1) {
+            modalDurationUnit.value = 'minutes';
+            // Round to nearest minute just in case of float errors
+            modalDurationValue.value = Math.round(totalHours * 60);
+        } else {
+            modalDurationUnit.value = 'hours';
+            modalDurationValue.value = totalHours;
+        }
+
         modalNotes.value = data.notes || '';
 
         const modalContent = modal.querySelector('.modal-content');
@@ -296,7 +367,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         modal.classList.remove('hidden');
-        // Small timeout to allow CSS transition to capture opacity change
         requestAnimationFrame(() => {
             modal.classList.add('active');
         });
@@ -306,7 +376,49 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('active');
         setTimeout(() => {
             modal.classList.add('hidden');
-        }, 300); // Match transition duration
+        }, 300);
+    }
+
+    function saveModalData() {
+        const { activity, dateKey } = selectedCell;
+        if (!activity || !dateKey) return;
+
+        const completed = modalCompleted.checked;
+
+        // Parse Duration
+        let val = parseFloat(modalDurationValue.value);
+        if (isNaN(val) || val < 0) val = 0;
+
+        const unit = modalDurationUnit.value;
+        let finalHours = 0;
+
+        // Convert everything to hours for storage
+        if (unit === 'minutes') {
+            finalHours = val / 60;
+        } else {
+            finalHours = val;
+        }
+
+        const notes = modalNotes.value.trim();
+
+        if (!completed && finalHours === 0 && !notes) {
+            delete trackerData[activity][dateKey];
+        } else {
+            trackerData[activity][dateKey] = {
+                completed,
+                hours: finalHours,
+                notes
+            };
+        }
+
+        saveData();
+        renderTracker();
+
+        if (typeof calendarModal !== 'undefined' && calendarModal.classList.contains('active') && currentMobileActivity) {
+            openActivityCalendar(currentMobileActivity);
+        }
+
+        hideModal();
     }
 
     function openActivityCalendar(activity) {
@@ -319,7 +431,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         calendarGrid.innerHTML = '';
 
-        // Simple grid of just dates 1..N
         for (let i = 1; i <= daysInMonth; i++) {
             const dateKey = formatDateKey(year, month, i);
             const cellData = trackerData[activity][dateKey];
@@ -339,13 +450,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             dayCell.addEventListener('click', () => {
-                // Close the calendar modal first
                 calendarModal.classList.remove('active');
                 setTimeout(() => {
                     calendarModal.classList.add('hidden');
-                    // Open logging modal with animation AFTER calendar starts closing
                     openModal(activity, dateKey, true);
-                }, 100); // Slight delay for smoother transition
+                }, 100);
             });
 
             calendarGrid.appendChild(dayCell);
@@ -359,17 +468,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- CSV Export ---
     function exportToCSV() {
-        // Headers: Date, Activity, Status, Hours, Notes
         let csvContent = "data:text/csv;charset=utf-8,";
         csvContent += "Date,Activity,Status,Hours,Notes\n";
 
         const activities = Object.keys(trackerData);
-        // We iterate specifically through the current displayed month or ALL data?
-        // User asked for "monthly tracking sheet", usually implies the view.
-        // Let's dump ALL data but sorted by date is better. 
-        // Actually, easiest is iterating all our data structure.
-
-        // Let's flatten the data
         let rows = [];
 
         activities.forEach(activity => {
@@ -377,16 +479,13 @@ document.addEventListener('DOMContentLoaded', () => {
             dateKeys.forEach(date => {
                 const entry = trackerData[activity][date];
                 const status = entry.completed ? "Completed" : "In Progress";
-                // Escape quotes in notes
                 const notes = entry.notes ? `"${entry.notes.replace(/"/g, '""')}"` : "";
 
                 rows.push(`${date},"${activity}",${status},${entry.hours},${notes}`);
             });
         });
 
-        // Sort rows by date
         rows.sort();
-
         csvContent += rows.join("\n");
 
         const encodedUri = encodeURI(csvContent);
