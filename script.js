@@ -450,11 +450,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             dayCell.addEventListener('click', () => {
-                calendarModal.classList.remove('active');
+                // Zoom Out Animation for Calendar
+                const calendarContent = calendarModal.querySelector('.calendar-modal-content');
+                calendarContent.classList.add('zoom-out');
+
+                // Wait for animation then switch
                 setTimeout(() => {
+                    calendarModal.classList.remove('active');
                     calendarModal.classList.add('hidden');
+                    calendarContent.classList.remove('zoom-out'); // Reset
+
+                    // Open logging modal
                     openModal(activity, dateKey, true);
-                }, 100);
+                }, 300);
             });
 
             calendarGrid.appendChild(dayCell);

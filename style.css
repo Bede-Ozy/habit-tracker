@@ -477,85 +477,17 @@ body {
     width: 100%;
 }
 
-@media (max-width: 768px) {
-    .header-content h1 {
-        font-size: 1.8rem;
-    }
-
-    .app-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
-    .header-actions {
-        width: 100%;
-        display: flex;
-        justify-content: flex-start;
-    }
-
-    .controls-section {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .add-activity-wrapper {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    #new-activity-input {
-        width: 100%;
-    }
-
-    .tracker-grid-container {
-        padding: 1rem;
-    }
-
-    /* Hide horizontal scrolling dates on mobile */
-    .dates-header .date-cell,
-    .dates-row {
-        display: none;
-    }
-
-    .activity-label {
-        width: 100%;
-        max-width: 100%;
-        min-width: 100%;
-        position: static;
-        background: transparent;
-        border-bottom: 1px solid var(--glass-border);
-        padding: 1rem 0;
-        cursor: pointer;
-        /* Clickable on mobile */
-    }
-
-    .activity-row {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .tracker-header {
-        display: none;
-        /* Hide main header on mobile */
-    }
-}
-
-/* Update activity label to be a flex container */
+/* Base Activity Label Styles */
 .activity-label {
     min-width: 200px;
     max-width: 200px;
     font-weight: 600;
     padding-right: 0.5rem;
-    /* Reduced padding to fit button */
     white-space: nowrap;
     overflow: visible;
-    /* Changed from hidden to allow button visibility if needed, though we use flex inside */
     text-overflow: clip;
-    /* Handled by inner span */
     position: sticky;
     left: 0;
-    /* background: var(--bg-color);  Match body bg */
     z-index: 10;
     display: flex;
     align-items: center;
@@ -580,7 +512,6 @@ body {
     background: transparent;
     border: none;
     color: #ef4444;
-    /* Red color */
     cursor: pointer;
     font-size: 1.1rem;
     opacity: 0;
@@ -601,23 +532,24 @@ body {
     background: rgba(239, 68, 68, 0.1);
 }
 
-@media (max-width: 768px) {
-    .activity-label {
-        min-width: 140px;
-        max-width: 140px;
-    }
-
-    .delete-btn {
-        opacity: 1;
-        /* Always show on mobile since no hover */
-        font-size: 1rem;
-    }
-}
-
 /* Calendar Modal Styles */
 .calendar-modal-content {
     width: 90%;
     max-width: 400px;
+    transform: scale(0.8);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+
+.modal.active .calendar-modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.calendar-modal-content.zoom-out {
+    transform: scale(1.1);
+    opacity: 0;
+    transition: transform 0.3s ease-in, opacity 0.3s ease-in;
 }
 
 .modal-subtitle {
@@ -798,105 +730,88 @@ body {
 
 .toast-actions {
     display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    align-items: center;
 }
 
-.btn-sm {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-}
-
-.icon-btn-sm {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-size: 1.2rem;
-    padding: 0.25rem;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.icon-btn-sm:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-}
-
-/* DEPRECATED INSTALL TOAST STYLES REMOVED */
-
-/* Update activity label to be a flex container */
-.activity-label {
-    min-width: 200px;
-    max-width: 200px;
-    font-weight: 600;
-    padding-right: 0.5rem;
-    /* Reduced padding to fit button */
-    white-space: nowrap;
-    overflow: visible;
-    /* Changed from hidden to allow button visibility if needed, though we use flex inside */
-    text-overflow: clip;
-    /* Handled by inner span */
-    position: sticky;
-    left: 0;
-    /* background: var(--bg-color);  Match body bg */
-    z-index: 10;
-    display: flex;
-    align-items: center;
-}
-
-.activity-label-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding-right: 5px;
-}
-
-.activity-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin-right: 5px;
-}
-
-.delete-btn {
-    background: transparent;
-    border: none;
-    color: #ef4444;
-    /* Red color */
-    cursor: pointer;
-    font-size: 1.1rem;
-    opacity: 0;
-    transition: all 0.2s;
-    padding: 4px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.activity-row:hover .delete-btn {
-    opacity: 0.7;
-}
-
-.delete-btn:hover {
-    opacity: 1 !important;
-    background: rgba(239, 68, 68, 0.1);
-}
-
+/* --- Mobile Media Queries (At the end to override) --- */
 @media (max-width: 768px) {
-    .activity-label {
-        min-width: 140px;
-        max-width: 140px;
+    .header-content h1 {
+        font-size: 1.8rem;
     }
 
+    .app-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .header-actions {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+    }
+
+    .header-actions .btn {
+        width: 100%;
+        /* Full width button */
+        justify-content: center;
+    }
+
+    .controls-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .add-activity-wrapper {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    #new-activity-input {
+        width: 100%;
+    }
+
+    .add-activity-wrapper .btn {
+        width: 100%;
+        /* Full width button */
+        justify-content: center;
+    }
+
+    .tracker-grid-container {
+        padding: 1rem;
+    }
+
+    /* Hide horizontal scrolling dates on mobile */
+    .dates-header .date-cell,
+    .dates-row {
+        display: none !important;
+        /* Force hide */
+    }
+
+    .activity-label {
+        width: 100%;
+        max-width: 100%;
+        min-width: 100%;
+        position: static;
+        background: transparent;
+        border-bottom: 1px solid var(--glass-border);
+        padding: 1rem 0;
+        cursor: pointer;
+    }
+
+    /* Ensure delete button is visible on mobile */
     .delete-btn {
         opacity: 1;
-        /* Always show on mobile since no hover */
-        font-size: 1rem;
+        font-size: 1.2rem;
+        padding: 0.5rem;
+    }
+
+    .activity-row {
+        flex-direction: column;
+        /* Should be default but ensures proper flow */
+        align-items: flex-start;
+    }
+
+    .tracker-header {
+        display: none;
     }
 }
