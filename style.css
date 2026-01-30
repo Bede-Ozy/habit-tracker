@@ -1,0 +1,543 @@
+:root {
+    --bg-color: #0f172a;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-primary: #3b82f6;
+    /* Blue */
+    --accent-secondary: #8b5cf6;
+    /* Purple */
+    --accent-tertiary: #ec4899;
+    /* Pink */
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --success-color: #10b981;
+    --grid-cell-size: 40px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Outfit', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Background Effects */
+.background-blobs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    animation: float 20s infinite ease-in-out;
+}
+
+.blob-1 {
+    width: 400px;
+    height: 400px;
+    background: var(--accent-primary);
+    top: -100px;
+    left: -100px;
+}
+
+.blob-2 {
+    width: 500px;
+    height: 500px;
+    background: var(--accent-secondary);
+    bottom: -150px;
+    right: -150px;
+    animation-delay: -5s;
+}
+
+.blob-3 {
+    width: 300px;
+    height: 300px;
+    background: var(--accent-tertiary);
+    top: 40%;
+    left: 40%;
+    animation-delay: -10s;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    33% {
+        transform: translate(30px, -50px);
+    }
+
+    66% {
+        transform: translate(-20px, 20px);
+    }
+}
+
+/* Main Layout */
+.app-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+}
+
+.header-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-tertiary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header-content p {
+    color: var(--text-secondary);
+}
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.btn-secondary {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.icon-btn:hover {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+}
+
+/* Controls */
+.controls-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.date-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--glass-bg);
+    padding: 0.5rem 1rem;
+    border-radius: 15px;
+    border: 1px solid var(--glass-border);
+}
+
+.add-activity-wrapper {
+    display: flex;
+    gap: 0.5rem;
+}
+
+#new-activity-input {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    color: var(--text-primary);
+    outline: none;
+    width: 250px;
+}
+
+#new-activity-input:focus {
+    border-color: var(--accent-primary);
+}
+
+/* Tracker Grid */
+.tracker-grid-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    overflow-x: auto;
+    /* Enable horizontal scroll */
+}
+
+/* Custom Scrollbar for Grid */
+.tracker-grid-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.tracker-grid-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 4px;
+}
+
+.tracker-grid-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.tracker-grid-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.tracker-header {
+    display: flex;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 1rem;
+}
+
+.tracker-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.activity-row {
+    display: flex;
+    align-items: center;
+    transition: background 0.2s;
+    border-radius: 8px;
+    padding: 0.25rem 0;
+}
+
+.activity-row:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.activity-label {
+    min-width: 200px;
+    max-width: 200px;
+    font-weight: 600;
+    padding-right: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: sticky;
+    left: 0;
+    /* backdrop-filter: blur(10px); Use solid for better performance if buggy */
+    background: var(--bg-color);
+    /* Stickiness hack */
+    z-index: 10;
+    display: flex;
+    align-items: center;
+}
+
+/* Hack to make sticky bg match glass */
+.activity-row .activity-label {
+    background: transparent;
+    /* Changed approach: rely on row hover */
+}
+
+/* Revert sticky background for scroll readability */
+.tracker-header .activity-label,
+.activity-row .activity-label {
+    /* background: #0f172a;  Match body bg */
+    /* Ideally just let it float, but for rigorous opacity... let's just keep it simple */
+}
+
+
+.dates-row {
+    display: flex;
+    gap: 4px;
+    /* Space between cells */
+}
+
+.date-cell {
+    width: var(--grid-cell-size);
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.grid-cell {
+    width: var(--grid-cell-size);
+    height: var(--grid-cell-size);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: transparent;
+}
+
+.grid-cell:hover {
+    border-color: var(--accent-primary);
+    transform: scale(1.1);
+    z-index: 2;
+}
+
+.grid-cell.completed {
+    background: var(--success-color);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.grid-cell.has-hours {
+    color: white;
+    font-weight: bold;
+}
+
+/* Partial completion or just hours logged styling */
+.grid-cell.logged-some {
+    background: rgba(59, 130, 246, 0.3);
+    border-color: var(--accent-primary);
+    color: white;
+}
+
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.modal.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.hidden {
+    display: none;
+    /* Fallback */
+}
+
+.modal-content {
+    background: #1e293b;
+    width: 400px;
+    padding: 2rem;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    transform: translateY(20px);
+    transition: transform 0.3s;
+    position: relative;
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
+}
+
+.close-modal {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.close-modal:hover {
+    color: white;
+}
+
+.modal h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+#modal-date-display {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.form-group input[type="number"],
+.form-group textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    padding: 0.75rem;
+    border-radius: 8px;
+    color: white;
+    outline: none;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--success-color);
+}
+
+.full-width {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .header-content h1 {
+        font-size: 1.8rem;
+    }
+
+    .tracker-grid-container {
+        padding: 1rem;
+    }
+}
+
+/* Update activity label to be a flex container */
+.activity-label {
+    min-width: 200px;
+    max-width: 200px;
+    font-weight: 600;
+    padding-right: 0.5rem;
+    /* Reduced padding to fit button */
+    white-space: nowrap;
+    overflow: visible;
+    /* Changed from hidden to allow button visibility if needed, though we use flex inside */
+    text-overflow: clip;
+    /* Handled by inner span */
+    position: sticky;
+    left: 0;
+    /* background: var(--bg-color);  Match body bg */
+    z-index: 10;
+    display: flex;
+    align-items: center;
+}
+
+.activity-label-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-right: 5px;
+}
+
+.activity-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 5px;
+}
+
+.delete-btn {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    /* Red color */
+    cursor: pointer;
+    font-size: 1.1rem;
+    opacity: 0;
+    transition: all 0.2s;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.activity-row:hover .delete-btn {
+    opacity: 0.7;
+}
+
+.delete-btn:hover {
+    opacity: 1 !important;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+@media (max-width: 768px) {
+    .activity-label {
+        min-width: 140px;
+        max-width: 140px;
+    }
+
+    .delete-btn {
+        opacity: 1;
+        /* Always show on mobile since no hover */
+        font-size: 1rem;
+    }
+}

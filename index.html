@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Challenge Monthly Tracker</title>
+    <!-- Google Fonts for Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Remux Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <main class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <h1>Monthly <span class="gradient-text">Challenge</span> Tracker</h1>
+                <p>Track your habits, stay consistent, and level up.</p>
+            </div>
+            <div class="header-actions">
+                <button id="export-btn" class="btn btn-primary">
+                    <i class="ri-download-line"></i> Export CSV
+                </button>
+            </div>
+        </header>
+
+        <section class="controls-section">
+            <div class="date-display">
+                <button id="prev-month" class="icon-btn"><i class="ri-arrow-left-s-line"></i></button>
+                <h2 id="current-month">January 2026</h2>
+                <button id="next-month" class="icon-btn"><i class="ri-arrow-right-s-line"></i></button>
+            </div>
+
+            <div class="add-activity-wrapper">
+                <input type="text" id="new-activity-input" placeholder="Add custom activity...">
+                <button id="add-activity-btn" class="btn btn-secondary"><i class="ri-add-line"></i> Add</button>
+            </div>
+        </section>
+
+        <div class="tracker-grid-container">
+            <div class="tracker-header">
+                <div class="header-cell activity-label">Activity</div>
+                <!-- Dates will be injected here via JS -->
+                <div id="dates-header" class="dates-row"></div>
+            </div>
+
+            <div id="tracker-body" class="tracker-body">
+                <!-- Rows will be injected here via JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for logging details -->
+    <div id="log-modal" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <span id="close-modal" class="close-modal">&times;</span>
+            <h3 id="modal-activity-title">Activity Name</h3>
+            <p id="modal-date-display">Date</p>
+
+            <div class="modal-form">
+                <div class="form-group">
+                    <label>Status</label>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="modal-completed">
+                        <label for="modal-completed">Completed</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Duration (Hours)</label>
+                    <input type="number" id="modal-hours" min="0" step="0.5" placeholder="e.g. 2.5">
+                </div>
+
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="modal-notes" rows="3" placeholder="Brief notes..."></textarea>
+                </div>
+
+                <button id="save-log-btn" class="btn btn-primary full-width">Save Progress</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log('Service Worker Registered'))
+                .catch((error) => console.log('Service Worker Registration Failed:', error));
+        }
+    </script>
+</body>
+
+</html>
